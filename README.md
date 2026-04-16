@@ -1,2 +1,2 @@
 ## Game 
-[Play here!]((https://zhihong141.github.io/Music-Rhythm-Game/) 
+[Try it here!]((https://zhihong141.github.io/Music-Rhythm_Game/) 
