@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TE-Rhythm // PRO_CORE.v18 [MODDED]</title>
+    <style>
+        :root {
+            --bg-device: #e0e0e0;
+            --screen-bg: #050505;
+            --accent-orange: #ff5f00;
+            --accent-fever: #00f2ff;
+            --button-depth: #bcbcbc;
+        }
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        body {
+            margin: 0;
+            background-color: var(--bg-device);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: pan-y pinch-zoom;
+            padding: 10px;
+        }
+        #hardware-ui {
+            background: var(--bg-device);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 10px 10px 30px #bebebe, -10px -10px 30px #ffffff;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border: 1px solid #d1d1d1;
+            width: 100%;
+            max-width: 480px;
+            box-sizing: border-box;
+        }
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-end; 
+            padding: 0 5px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .label { 
+            font-size: 8px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            color: #888; 
+        }
+        
+        #screen-container {
+            background: #1a1a1a;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: inset 2px 2px 6px rgba(0,0,0,0.6);
+            position: relative;
+            height: 60vh;
+            min-height: 400px;
+            max-height: 520px;
+            overflow: hidden;
+            touch-action: none;
+        }
+        canvas { 
+            display: block; 
+            background-color: var(--screen-bg); 
+            border-radius: 4px; 
+            width: 100%; 
+            height: calc(100% - 14px);
+            touch-action: none;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 8px; left: 8px; right: 8px; bottom: 22px;
+            background: var(--screen-bg);
+            z-index: 10;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            color: white;
+            text-align: center;
+            border-radius: 4px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 15px 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .menu-title { 
+            font-size: clamp(18px, 5vw, 24px); 
+            font-weight: 900; 
+            letter-spacing: -1px; 
+            margin-bottom: 15px; 
+            color: var(--accent-orange); 
+        }
+        .menu-subtitle { 
+            font-size: 10px; 
+            color: #666; 
+            margin-bottom: 15px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+        .menu-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: white;
+            padding: 14px 20px;
+            margin: 6px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            width: 90%;
+            max-width: 220px;
+            text-transform: uppercase;
+            font-size: 13px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .menu-btn:hover:not(:disabled), .menu-btn:active:not(:disabled) { 
+            border-color: var(--accent-orange); 
+            color: var(--accent-orange); 
+        }
+        .menu-btn:disabled { color: #333; border-color: #222; cursor: not-allowed; }
+
+        .stat-line { 
+            display: flex; 
+            justify-content: space-between; 
+            width: 90%; 
+            max-width: 220px; 
+            margin: 4px 0; 
+            border-bottom: 1px solid #222; 
+            padding-bottom: 2px; 
+        }
+        .stat-label { font-size: 9px; color: #666; text-transform: uppercase; }
+        .stat-val { font-family: 'Courier New', monospace; font-weight: bold; color: var(--accent-orange); }
+
+        #progress-wrapper { 
+            width: 100%; 
+            height: 4px; 
+            background: #333; 
+            margin-top: 8px; 
+            border-radius: 2px; 
+            overflow: hidden; 
+        }
+        #progress-fill { width: 0%; height: 100%; background: var(--accent-orange); transition: background 0.3s; }
+        #progress-fill.fever { background: var(--accent-fever); box-shadow: 0 0 10px var(--accent-fever); }
+
+        #controls { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .custom-file-upload {
+            background: #dcdcdc;
+            border: 1px solid var(--button-depth);
+            border-bottom: 3px solid var(--button-depth);
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 10px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .custom-file-upload:active { border-bottom-width: 1px; transform: translateY(2px); }
+        input[type="file"] { display: none; }
+
+        .diff-btn {
+            background: #dcdcdc;
+            border: 1px solid #bcbcbc;
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 6px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .diff-btn.active { background: var(--accent-orange); color: white; border: none; }
+
+        .readout-box {
+            font-family: 'Courier New', monospace;
+            background: #dcdcdc;
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid #bcbcbc;
+            text-align: center;
+            font-size: clamp(14px, 4vw, 18px);
+            font-weight: bold;
+        }
+
+        /* MOD MENU STYLES */
+        .mod-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 15px;
+        }
+        .mod-item {
+            background: #111;
+            border: 1px solid #333;
+            padding: 12px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mod-item:hover, .mod-item:active { border-color: #555; }
+        .mod-item.active { 
+            border-color: var(--accent-orange); 
+            background: rgba(255, 95, 0, 0.1);
+        }
+        .mod-name {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .mod-desc {
+            font-size: 9px;
+            color: #666;
+            margin-top: 2px;
+        }
+        .mod-toggle {
+            width: 44px;
+            height: 24px;
+            background: #222;
+            border-radius: 12px;
+            position: relative;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        .mod-item.active .mod-toggle {
+            background: var(--accent-orange);
+        }
+        .mod-toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: left 0.3s;
+        }
+        .mod-item.active .mod-toggle::after {
+            left: 23px;
+        }
+        .mod-category {
+            color: var(--accent-fever);
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 12px 0 8px 0;
+            width: 100%;
+            text-align: left;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            #hardware-ui {
+                padding: 15px;
+                gap: 12px;
+                border-radius: 15px;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .header-right {
+                display: flex;
+                gap: 10px;
+                width: 100%;
+                justify-content: space-between;
+            }
+            #ver-label {
+                font-size: 12px !important;
+            }
+            #screen-container {
+                height: 50vh;
+                min-height: 350px;
+            }
+            .menu-btn {
+                padding: 16px 20px;
+                font-size: 12px;
+            }
+            .mod-item {
+                padding: 14px 12px;
+            }
+        }
+
+        @media (max-height: 700px) {
+            #screen-container {
+                height: 45vh;
+                min-height: 300px;
+            }
+            #hardware-ui {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hardware-ui">
+        <header>
+            <div>
+                <div class="label">System OS</div>
+                <div style="font-weight: 900; font-size: clamp(12px, 3.5vw, 14px); margin-bottom: 5px;" id="ver-label">SYNC_CORE.v18 [MODDED]</div>
+                <div id="difficulty-switches">
+                    <button class="diff-btn active" onclick="setDifficulty('easy')">EASY</button>
+                    <button class="diff-btn" onclick="setDifficulty('normal')">NORM</button>
+                    <button class="diff-btn" onclick="setDifficulty('hard')">HARD</button>
+                </div>
+            </div>
+            <div class="header-right">
+                <div>
+                    <div class="label">Streak</div>
+                    <div class="readout-box" id="streak-count">00</div>
+                </div>
+                <div>
+                    <div class="label">Score</div>
+                    <div class="readout-box" id="score-readout">0000</div>
+                </div>
+            </div>
+        </header>
+
+        <div id="screen-container">
+            <div id="overlay"></div>
+            <canvas id="gameCanvas"></canvas>
+            <div id="progress-wrapper"><div id="progress-fill"></div></div>
+        </div>
+
+        <div id="controls">
+            <label class="custom-file-upload">
+                <input type="file" id="audio-upload" accept="audio/*">
+                <span>LOAD_DATA</span>
+            </label>
+            <div style="text-align: right; flex: 1; min-width: 120px;">
+                <div class="label">Module Status</div>
+                <div style="font-size: clamp(9px, 2.5vw, 11px); font-weight: bold;" id="status-text">SYSTEM_READY</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const overlay = document.getElementById('overlay');
+        const audioUpload = document.getElementById('audio-upload');
+        const scoreReadout = document.getElementById('score-readout');
+        const streakReadout = document.getElementById('streak-count');
+        const progressFill = document.getElementById('progress-fill');
+        const statusText = document.getElementById('status-text');
+
+        // Responsive canvas setup
+        function resizeCanvas() {
+            const container = document.getElementById('screen-container');
+            const rect = container.getBoundingClientRect();
+            canvas.width = Math.floor(rect.width - 16);
+            canvas.height = Math.floor(rect.height - 20);
+            
+            // Recalculate lane positions based on canvas width
+            const laneSpacing = canvas.width / 4;
+            LANES = [laneSpacing, laneSpacing * 2, laneSpacing * 3];
+            currentLanePositions = [...LANES];
+            PLAYER_Y = Math.floor(canvas.height * PLAYER_Y_RATIO);
+            
+            // Redraw when resizing
+            if (gameState === 'MENU' || gameState === 'PAUSED') {
+                ctx.fillStyle = '#050505';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+        
+        // Initialize canvas first
+        resizeCanvas();
+        
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+        
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 100);
+        });
+
+        const DIFFICULTIES = {
+            easy:   { threshold: 230, speed: 2.5, cooldown: 450 },
+            normal: { threshold: 185, speed: 6.0, cooldown: 180 },
+            hard:   { threshold: 160, speed: 9.0, cooldown: 120 }
+        };
+
+        let currentDiff = DIFFICULTIES.easy;
+        let LANES = []; // Will be calculated based on canvas width
+        const PLAYER_Y_RATIO = 0.88; // 88% down the canvas
+        let PLAYER_Y;
+        
+        let gameState = 'MENU';
+        let score = 0, streak = 0, maxStreak = 0;
+        let blocks = [], particles = [], judgments = [];
+        let playerLane = 1;
+        
+        let audioCtx, analyser, dataArray, source, startTime, duration = 0, pausedAt = 0;
+        let decodedBuffer = null;
+        let lastSpawn = 0, hitGlow = 0, shakeIntensity = 0;
+        let feverMode = false;
+
+        // MOD SYSTEM
+        let activeMods = {
+            blockFadeOut: false,
+            slowMotion: false,
+            hyperSpeed: false,
+            dynamicSpeed: false,
+            invisibleBlocks: false,
+            ghostMode: false,
+            laneSwap: false,
+            laneRotate: false,
+            survival: false,
+            multiplierMadness: false,
+            bassDropBoost: false,
+            pitchLanes: false,
+            rainbowFever: false,
+            chromaticAberration: false,
+            mirrorMode: false,
+            tunnelVision: false,
+            drunkMode: false,
+            quantumBlocks: false,
+            rhythmMemory: false
+        };
+
+        // Mod state variables
+        let survivalLives = 3;
+        let customMultiplier = 1;
+        let laneSwapTimer = 0;
+        let laneRotateTimer = 0;
+        let currentLanePositions = []; // Will be set after canvas init
+        let mirrorTimer = 0;
+        let isMirrored = false;
+        let hueOffset = 0;
+
+        // STATS TRACKING SYSTEM
+        let sessionStats = {
+            totalHits: 0,
+            totalMisses: 0,
+            perfectHits: 0,
+            greatHits: 0,
+            sessionStartTime: null,
+            sessionEndTime: null,
+            activeMods: []
+        };
+
+        let gameHistory = JSON.parse(localStorage.getItem('rhythmGameHistory') || '[]');
+        let allTimeStats = JSON.parse(localStorage.getItem('rhythmGameStats') || JSON.stringify({
+            totalGamesPlayed: 0,
+            totalScore: 0,
+            highScore: 0,
+            longestStreak: 0,
+            totalPlayTime: 0,
+            averageAccuracy: 0,
+            favoriteModsUsed: {}
+        }));
+
+        function setDifficulty(level) {
+            currentDiff = DIFFICULTIES[level];
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        audioUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const arrayBuffer = await file.arrayBuffer();
+            decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            duration = decodedBuffer.duration;
+
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+            statusText.innerText = "TRACK_LOADED";
+            showMenu();
+        });
+
+        function showMenu() {
+            gameState = 'MENU';
+            overlay.style.display = 'flex';
+            overlay.style.zIndex = '10';
+            overlay.innerHTML = `
+                <div class="menu-title">TE-RHYTHM MODDED</div>
+                <button class="menu-btn" onclick="showModMenu()">MODS</button>
+                <button class="menu-btn" onclick="showStatsMenu()">STATS & HISTORY</button>
+                <button class="menu-btn" onclick="startGame()" ${!decodedBuffer ? 'disabled' : ''}>START</button>
+                ${score > 0 ? `
+                    <div style="margin-top: 20px;">
+                        <div class="stat-line"><span class="stat-label">Final Score</span><span class="stat-val">${score}</span></div>
+                        <div class="stat-line"><span class="stat-label">Max Streak</span><span class="stat-val">${maxStreak}</span></div>
+                        <div class="stat-line"><span class="stat-label">Accuracy</span><span class="stat-val">${calculateAccuracy()}%</span></div>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function calculateAccuracy() {
+            const total = sessionStats.totalHits + sessionStats.totalMisses;
+            if (total === 0) return 0;
+            return Math.round((sessionStats.totalHits / total) * 100);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function showStatsMenu() {
+            const recentGames = gameHistory.slice(-10).reverse();
+            
+            overlay.innerHTML = `
+                <div class="menu-title">STATS & HISTORY</div>
+                <div style="width: 100%; overflow-y: auto; max-height: 70vh; padding: 5px;">
+                    
+                    <div class="mod-category">📊 ALL-TIME STATS</div>
+                    <div style="background: #111; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                        <div class="stat-line">
+                            <span class="stat-label">Games Played</span>
+                            <span class="stat-val">${allTimeStats.totalGamesPlayed}</span>
+                        </div>
+                        <div class="stat-line">
+                            <span class="stat-label">High Score</span>
+                            <span class="stat-val">${allTimeStats.highScore}</span>
+                        </div>
+                        <div class="stat-line">
+                            <span class="stat-label">Longest Streak</span>
+                            <span class="stat-val">${allTimeStats.longestStreak}</span>
+                        </div>
+                        <div class="stat-line">
+                            <span class="stat-label">Total Play Time</span>
+                            <span class="stat-val">${formatTime(allTimeStats.totalPlayTime)}</span>
+                        </div>
+                        <div class="stat-line">
+                            <span class="stat-label">Avg Accuracy</span>
+                            <span class="stat-val">${allTimeStats.averageAccuracy.toFixed(1)}%</span>
+                        </div>
+                    </div>
+
+                    <div class="mod-category">🎮 MOST USED MODS</div>
+                    <div style="background: #111; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                        ${Object.entries(allTimeStats.favoriteModsUsed)
+                            .sort((a, b) => b[1] - a[1])
+                            .slice(0, 5)
+                            .map(([mod, count]) => `
+                                <div style="display: flex; justify-content: space-between; margin: 5px 0; font-size: 10px;">
+                                    <span style="color: #aaa; text-transform: uppercase;">${mod.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                    <span style="color: var(--accent-orange); font-weight: bold;">${count}x</span>
+                                </div>
+                            `).join('') || '<div style="color: #666; font-size: 10px; text-align: center;">No mod data yet</div>'}
+                    </div>
+
+                    <div class="mod-category">📜 RECENT SESSIONS</div>
+                    ${recentGames.length > 0 ? recentGames.map((game, idx) => `
+                        <div style="background: #111; padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid ${game.score >= allTimeStats.highScore * 0.8 ? 'var(--accent-orange)' : '#333'};">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap;">
+                                <span style="font-size: 8px; color: #666;">${formatDate(game.timestamp)}</span>
+                                <span style="font-size: 8px; color: ${game.score === allTimeStats.highScore ? 'var(--accent-fever)' : '#888'};">
+                                    ${game.score === allTimeStats.highScore ? '👑 BEST' : ''}
+                                </span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 9px;">
+                                <div>
+                                    <div style="color: #666;">Score</div>
+                                    <div style="color: var(--accent-orange); font-weight: bold; font-size: 13px;">${game.score}</div>
+                                </div>
+                                <div>
+                                    <div style="color: #666;">Streak</div>
+                                    <div style="color: white; font-weight: bold; font-size: 13px;">${game.maxStreak}</div>
+                                </div>
+                                <div>
+                                    <div style="color: #666;">Accuracy</div>
+                                    <div style="color: var(--accent-fever); font-weight: bold;">${game.accuracy}%</div>
+                                </div>
+                                <div>
+                                    <div style="color: #666;">Duration</div>
+                                    <div style="color: white; font-weight: bold;">${formatTime(game.playTime)}</div>
+                                </div>
+                            </div>
+                            ${game.modsUsed.length > 0 ? `
+                                <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #222;">
+                                    <div style="font-size: 8px; color: #666; margin-bottom: 4px;">MODS USED</div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                                        ${game.modsUsed.map(mod => `
+                                            <span style="background: #222; padding: 2px 5px; border-radius: 3px; font-size: 7px; color: var(--accent-orange);">
+                                                ${mod.replace(/([A-Z])/g, ' $1').trim().toUpperCase()}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('') : '<div style="color: #666; text-align: center; padding: 20px;">No games played yet</div>'}
+                    
+                    ${gameHistory.length > 0 ? `
+                        <button class="menu-btn" onclick="clearHistory()" style="margin-top: 10px; background: #1a0000; border-color: #440000; color: #ff4444;">
+                            CLEAR HISTORY
+                        </button>
+                    ` : ''}
+                </div>
+                <button class="menu-btn" onclick="showMenu()">BACK</button>
+            `;
+        }
+
+        function clearHistory() {
+            if (confirm('Clear all game history and stats? This cannot be undone!')) {
+                gameHistory = [];
+                allTimeStats = {
+                    totalGamesPlayed: 0,
+                    totalScore: 0,
+                    highScore: 0,
+                    longestStreak: 0,
+                    totalPlayTime: 0,
+                    averageAccuracy: 0,
+                    favoriteModsUsed: {}
+                };
+                localStorage.setItem('rhythmGameHistory', '[]');
+                localStorage.setItem('rhythmGameStats', JSON.stringify(allTimeStats));
+                showStatsMenu();
+            }
+        }
+
+        function saveGameStats() {
+            const accuracy = calculateAccuracy();
+            const playTime = sessionStats.sessionEndTime - sessionStats.sessionStartTime;
+            
+            // Save individual game
+            const gameRecord = {
+                timestamp: Date.now(),
+                score: score,
+                maxStreak: maxStreak,
+                accuracy: accuracy,
+                playTime: playTime / 1000,
+                modsUsed: sessionStats.activeMods,
+                totalHits: sessionStats.totalHits,
+                totalMisses: sessionStats.totalMisses,
+                perfectHits: sessionStats.perfectHits,
+                greatHits: sessionStats.greatHits
+            };
+            
+            gameHistory.push(gameRecord);
+            if (gameHistory.length > 50) gameHistory.shift(); // Keep last 50 games
+            localStorage.setItem('rhythmGameHistory', JSON.stringify(gameHistory));
+            
+            // Update all-time stats
+            allTimeStats.totalGamesPlayed++;
+            allTimeStats.totalScore += score;
+            if (score > allTimeStats.highScore) allTimeStats.highScore = score;
+            if (maxStreak > allTimeStats.longestStreak) allTimeStats.longestStreak = maxStreak;
+            allTimeStats.totalPlayTime += playTime / 1000;
+            
+            // Calculate average accuracy
+            const totalAccuracy = gameHistory.reduce((sum, game) => sum + game.accuracy, 0);
+            allTimeStats.averageAccuracy = totalAccuracy / gameHistory.length;
+            
+            // Track mod usage
+            sessionStats.activeMods.forEach(mod => {
+                allTimeStats.favoriteModsUsed[mod] = (allTimeStats.favoriteModsUsed[mod] || 0) + 1;
+            });
+            
+            localStorage.setItem('rhythmGameStats', JSON.stringify(allTimeStats));
+        }
+
+        function showModMenu() {
+            overlay.innerHTML = `
+                <div class="menu-title">MOD SELECTION</div>
+                <div class="menu-subtitle">Customize Your Experience</div>
+                <div style="width: 100%; overflow-y: auto; max-height: 65vh;">
+                    <div class="mod-category">🎯 VISUAL MODS</div>
+                    <div class="mod-grid">
+                        <div class="mod-item" onclick="toggleMod('blockFadeOut')">
+                            <div>
+                                <div class="mod-name">Block Fade Out</div>
+                                <div class="mod-desc">Blocks fade near player bar</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('invisibleBlocks')">
+                            <div>
+                                <div class="mod-name">Invisible Blocks</div>
+                                <div class="mod-desc">Only visible in top third</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('ghostMode')">
+                            <div>
+                                <div class="mod-name">Ghost Mode</div>
+                                <div class="mod-desc">Blocks flicker randomly</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('rainbowFever')">
+                            <div>
+                                <div class="mod-name">Rainbow Fever</div>
+                                <div class="mod-desc">Colorful spectrum blocks</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('chromaticAberration')">
+                            <div>
+                                <div class="mod-name">Chromatic FX</div>
+                                <div class="mod-desc">RGB split effect</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('tunnelVision')">
+                            <div>
+                                <div class="mod-name">Tunnel Vision</div>
+                                <div class="mod-desc">Darkened inactive lanes</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('rhythmMemory')">
+                            <div>
+                                <div class="mod-name">Rhythm Memory</div>
+                                <div class="mod-desc">Blocks vanish halfway</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                    </div>
+
+                    <div class="mod-category">⚡ SPEED MODS</div>
+                    <div class="mod-grid">
+                        <div class="mod-item" onclick="toggleMod('slowMotion')">
+                            <div>
+                                <div class="mod-name">Slow Motion</div>
+                                <div class="mod-desc">0.5x speed</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('hyperSpeed')">
+                            <div>
+                                <div class="mod-name">Hyper Speed</div>
+                                <div class="mod-desc">2x speed challenge</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('dynamicSpeed')">
+                            <div>
+                                <div class="mod-name">Dynamic Speed</div>
+                                <div class="mod-desc">Speed varies with music</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                    </div>
+
+                    <div class="mod-category">🎮 GAMEPLAY MODS</div>
+                    <div class="mod-grid">
+                        <div class="mod-item" onclick="toggleMod('laneSwap')">
+                            <div>
+                                <div class="mod-name">Lane Swap Chaos</div>
+                                <div class="mod-desc">Lanes shift randomly</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('laneRotate')">
+                            <div>
+                                <div class="mod-name">Lane Rotate</div>
+                                <div class="mod-desc">Lanes rotate positions</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('survival')">
+                            <div>
+                                <div class="mod-name">Survival Mode</div>
+                                <div class="mod-desc">3 lives, don't miss!</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('multiplierMadness')">
+                            <div>
+                                <div class="mod-name">Multiplier Madness</div>
+                                <div class="mod-desc">Higher risk/reward</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('mirrorMode')">
+                            <div>
+                                <div class="mod-name">Mirror Mode</div>
+                                <div class="mod-desc">Flips every 10 seconds</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('drunkMode')">
+                            <div>
+                                <div class="mod-name">Drunk Mode</div>
+                                <div class="mod-desc">Blocks sway randomly</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('quantumBlocks')">
+                            <div>
+                                <div class="mod-name">Quantum Blocks</div>
+                                <div class="mod-desc">Blocks split & collapse</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                    </div>
+
+                    <div class="mod-category">🎵 AUDIO MODS</div>
+                    <div class="mod-grid">
+                        <div class="mod-item" onclick="toggleMod('bassDropBoost')">
+                            <div>
+                                <div class="mod-name">Bass Drop Boost</div>
+                                <div class="mod-desc">3x score on drops</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                        <div class="mod-item" onclick="toggleMod('pitchLanes')">
+                            <div>
+                                <div class="mod-name">Pitch Lanes</div>
+                                <div class="mod-desc">Frequency-based spawning</div>
+                            </div>
+                            <div class="mod-toggle"></div>
+                        </div>
+                    </div>
+                </div>
+                <button class="menu-btn" onclick="showMenu()" style="margin-top: 20px;">BACK</button>
+            `;
+            updateModDisplay();
+        }
+
+        function toggleMod(modName) {
+            // Mutual exclusivity for speed mods
+            if (modName === 'slowMotion' || modName === 'hyperSpeed' || modName === 'dynamicSpeed') {
+                activeMods.slowMotion = false;
+                activeMods.hyperSpeed = false;
+                activeMods.dynamicSpeed = false;
+            }
+            
+            activeMods[modName] = !activeMods[modName];
+            updateModDisplay();
+        }
+
+        function updateModDisplay() {
+            Object.keys(activeMods).forEach(modName => {
+                const modElement = document.querySelector(`.mod-item[onclick*="${modName}"]`);
+                if (modElement) {
+                    if (activeMods[modName]) {
+                        modElement.classList.add('active');
+                    } else {
+                        modElement.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        function startGame() {
+            if (!decodedBuffer) return;
+            gameState = 'GAME';
+            overlay.style.display = 'none';
+            score = 0; streak = 0; maxStreak = 0;
+            blocks = []; particles = []; judgments = [];
+            playerLane = 1;
+            feverMode = false;
+            
+            // Reset mod state
+            survivalLives = 3;
+            customMultiplier = 1;
+            laneSwapTimer = 0;
+            laneRotateTimer = 0;
+            currentLanePositions = [...LANES];
+            mirrorTimer = 0;
+            isMirrored = false;
+            hueOffset = 0;
+
+            // Initialize session stats
+            sessionStats = {
+                totalHits: 0,
+                totalMisses: 0,
+                perfectHits: 0,
+                greatHits: 0,
+                sessionStartTime: Date.now(),
+                sessionEndTime: null,
+                activeMods: Object.keys(activeMods).filter(mod => activeMods[mod])
+            };
+
+            scoreReadout.innerText = "0000";
+            streakReadout.innerText = "00";
+            progressFill.style.width = "0%";
+
+            if (source) source.stop();
+            source = audioCtx.createBufferSource();
+            source.buffer = decodedBuffer;
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            source.start(0);
+            startTime = audioCtx.currentTime;
+            
+            statusText.innerText = activeMods.survival ? `LIVES: ${survivalLives}` : "RUNNING";
+            gameLoop();
+        }
+
+        function showPause() {
+            gameState = 'PAUSED';
+            overlay.style.display = 'flex';
+            if (source) source.stop();
+            pausedAt = audioCtx.currentTime - startTime;
+            overlay.innerHTML = `
+                <div class="menu-title">PAUSED</div>
+                <div style="margin: 20px 0;">
+                    <div class="stat-line"><span class="stat-label">Current Score</span><span class="stat-val">${score}</span></div>
+                    <div class="stat-line"><span class="stat-label">Current Streak</span><span class="stat-val">${streak}</span></div>
+                    <div class="stat-line"><span class="stat-label">Accuracy</span><span class="stat-val">${calculateAccuracy()}%</span></div>
+                </div>
+                <button class="menu-btn" onclick="resumeGame()">RESUME</button>
+                <button class="menu-btn" onclick="quitGame()">QUIT</button>
+            `;
+        }
+
+        function quitGame() {
+            sessionStats.sessionEndTime = Date.now();
+            saveGameStats();
+            showMenu();
+        }
+
+        function resumeGame() {
+            gameState = 'GAME';
+            overlay.style.display = 'none';
+            source = audioCtx.createBufferSource();
+            source.buffer = decodedBuffer;
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            source.start(0, pausedAt);
+            startTime = audioCtx.currentTime - pausedAt;
+            gameLoop();
+        }
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (gameState !== 'GAME') return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
+            
+            const finalLanes = isMirrored ? [...currentLanePositions].reverse() : currentLanePositions;
+            const laneWidth = canvas.width / 3;
+            
+            if (x < laneWidth) playerLane = isMirrored ? 2 : 0;
+            else if (x > laneWidth * 2) playerLane = isMirrored ? 0 : 2;
+            else playerLane = 1;
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (gameState !== 'GAME') return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
+            
+            const finalLanes = isMirrored ? [...currentLanePositions].reverse() : currentLanePositions;
+            const laneWidth = canvas.width / 3;
+            
+            if (x < laneWidth) playerLane = isMirrored ? 2 : 0;
+            else if (x > laneWidth * 2) playerLane = isMirrored ? 0 : 2;
+            else playerLane = 1;
+        }, { passive: false });
+
+        canvas.addEventListener('click', (e) => {
+            if (gameState !== 'GAME') return;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+            
+            const finalLanes = isMirrored ? [...currentLanePositions].reverse() : currentLanePositions;
+            const laneWidth = canvas.width / 3;
+            
+            if (x < laneWidth) playerLane = isMirrored ? 2 : 0;
+            else if (x > laneWidth * 2) playerLane = isMirrored ? 0 : 2;
+            else playerLane = 1;
+        }, { passive: false });
+
+        window.addEventListener('keydown', (e) => {
+            if (gameState !== 'GAME') return;
+            if (e.key === 'ArrowLeft') playerLane = isMirrored ? 2 : 0;
+            if (e.key === 'ArrowDown' || e.key === 's') playerLane = 1;
+            if (e.key === 'ArrowRight') playerLane = isMirrored ? 0 : 2;
+            if (e.key === 'Escape') showPause();
+        });
+
+        function spawnJudgment(text, color) {
+            judgments.push({
+                text: text,
+                y: PLAYER_Y - 40,
+                alpha: 1.0,
+                color: color
+            });
+        }
+
+        function spawnExplosion(x, y, color) {
+            for(let i=0; i<15; i++) {
+                particles.push({
+                    x: x, y: y, 
+                    vx: (Math.random() - 0.5) * 12, 
+                    vy: (Math.random() - 0.5) * 12 - 4,
+                    life: 1.0, size: Math.random() * 4 + 2, color: color,
+                    gravity: 0.2
+                });
+            }
+        }
+
+        function update() {
+            if (gameState !== 'GAME') return;
+            const elapsed = audioCtx.currentTime - startTime;
+            const songProgress = Math.min((elapsed / duration), 1.0);
+            progressFill.style.width = `${songProgress * 100}%`;
+            
+            analyser.getByteFrequencyData(dataArray);
+            let energy = dataArray[2];
+            let bassEnergy = dataArray[0] + dataArray[1]; // For bass drop detection
+            
+            // Calculate gravity with speed mods
+            let baseGravity = currentDiff.speed + (energy / 35) + (songProgress * 3);
+            let gravity = baseGravity;
+            
+            if (activeMods.slowMotion) gravity *= 0.5;
+            if (activeMods.hyperSpeed) gravity *= 2;
+            if (activeMods.dynamicSpeed) {
+                gravity *= 0.7 + (energy / 255) * 1.3; // Varies between 0.7x and 2x
+            }
+
+            // Rainbow Fever hue rotation
+            if (activeMods.rainbowFever) {
+                hueOffset = (hueOffset + 2) % 360;
+            }
+
+            // Mirror Mode timer
+            if (activeMods.mirrorMode) {
+                mirrorTimer += 1/60;
+                if (mirrorTimer >= 10) {
+                    isMirrored = !isMirrored;
+                    mirrorTimer = 0;
+                    spawnJudgment(isMirrored ? "MIRRORED" : "NORMAL", "#00f2ff");
+                }
+            }
+
+            // Lane Swap Chaos
+            if (activeMods.laneSwap) {
+                laneSwapTimer += 1/60;
+                if (laneSwapTimer >= 7) {
+                    // Randomly shift lanes
+                    currentLanePositions = currentLanePositions.map(pos => 
+                        Math.max(60, Math.min(340, pos + (Math.random() - 0.5) * 80))
+                    );
+                    laneSwapTimer = 0;
+                }
+            }
+
+            // Lane Rotate
+            if (activeMods.laneRotate) {
+                laneRotateTimer += 1/60;
+                if (laneRotateTimer >= 8) {
+                    const temp = currentLanePositions[0];
+                    currentLanePositions[0] = currentLanePositions[1];
+                    currentLanePositions[1] = currentLanePositions[2];
+                    currentLanePositions[2] = temp;
+                    laneRotateTimer = 0;
+                }
+            }
+
+            // Multiplier Madness
+            if (activeMods.multiplierMadness) {
+                customMultiplier = 1 + (streak / 5);
+                if (customMultiplier > 8) customMultiplier = 8;
+            }
+
+            if (streak >= 25 && !feverMode) {
+                feverMode = true;
+                progressFill.classList.add('fever');
+                statusText.innerText = activeMods.survival ? `FEVER! LIVES: ${survivalLives}` : "FEVER_ACTIVE";
+            } else if (streak < 25 && feverMode) {
+                feverMode = false;
+                progressFill.classList.remove('fever');
+                statusText.innerText = activeMods.survival ? `LIVES: ${survivalLives}` : "RUNNING";
+            }
+
+            // Block spawning with Pitch Lanes mod
+            let shouldSpawn = energy > currentDiff.threshold && Date.now() - lastSpawn > currentDiff.cooldown;
+            
+            if (shouldSpawn) {
+                let spawnLane;
+                if (activeMods.pitchLanes) {
+                    // Use frequency data to determine lane
+                    let lowFreq = dataArray[0] + dataArray[1];
+                    let midFreq = dataArray[2] + dataArray[3];
+                    let highFreq = dataArray[4] + dataArray[5];
+                    let maxFreq = Math.max(lowFreq, midFreq, highFreq);
+                    
+                    if (maxFreq === lowFreq) spawnLane = 0;
+                    else if (maxFreq === midFreq) spawnLane = 1;
+                    else spawnLane = 2;
+                } else {
+                    spawnLane = Math.floor(Math.random() * 3);
+                }
+                
+                let newBlock = { 
+                    lane: spawnLane, 
+                    y: -30, 
+                    missed: false,
+                    swayOffset: Math.random() * Math.PI * 2, // For drunk mode
+                    isQuantum: activeMods.quantumBlocks && Math.random() > 0.7,
+                    quantumLane2: null,
+                    quantumCollapsed: false
+                };
+                
+                if (newBlock.isQuantum) {
+                    newBlock.quantumLane2 = (spawnLane + 1 + Math.floor(Math.random() * 2)) % 3;
+                }
+                
+                blocks.push(newBlock);
+                lastSpawn = Date.now();
+            }
+
+            blocks.forEach((b, i) => {
+                b.y += gravity;
+                
+                // Drunk Mode - sway blocks
+                if (activeMods.drunkMode) {
+                    b.swayOffset += 0.1;
+                }
+                
+                // Quantum Blocks - collapse near player
+                if (b.isQuantum && !b.quantumCollapsed && b.y > PLAYER_Y - 150) {
+                    b.quantumCollapsed = true;
+                    b.lane = Math.random() > 0.5 ? b.lane : b.quantumLane2;
+                }
+
+                let hitbox = b.y > PLAYER_Y - 25 && b.y < PLAYER_Y + 15;
+                let actualLane = isMirrored ? (2 - b.lane) : b.lane;
+                
+                if (hitbox && actualLane === playerLane) {
+                    const diff = Math.abs(b.y - PLAYER_Y);
+                    let points = 10;
+                    if (diff < 8) {
+                        points = 20;
+                        sessionStats.perfectHits++;
+                    } else {
+                        sessionStats.greatHits++;
+                    }
+                    sessionStats.totalHits++;
+
+                    // Apply mods
+                    let finalPoints = points;
+                    if (feverMode) finalPoints *= 2;
+                    if (activeMods.multiplierMadness) finalPoints *= customMultiplier;
+                    if (activeMods.bassDropBoost && bassEnergy > 400) finalPoints *= 3;
+                    
+                    score += Math.floor(finalPoints);
+                    streak++;
+                    if (streak > maxStreak) maxStreak = streak;
+                    
+                    scoreReadout.innerText = score.toString().padStart(4, '0');
+                    streakReadout.innerText = streak.toString().padStart(2, '0');
+                    
+                    hitGlow = 80; shakeIntensity = feverMode ? 25 : 15; 
+                    
+                    let explosionColor = feverMode ? 'var(--accent-fever)' : 'var(--accent-orange)';
+                    if (activeMods.rainbowFever) {
+                        explosionColor = `hsl(${hueOffset}, 100%, 50%)`;
+                    }
+                    
+                    spawnExplosion(currentLanePositions[b.lane], PLAYER_Y, explosionColor);
+                    blocks.splice(i, 1);
+                } else if (b.y > PLAYER_Y + 25 && !b.missed) {
+                    sessionStats.totalMisses++;
+                    streak = 0;
+                    streakReadout.innerText = "00";
+                    b.missed = true;
+                    feverMode = false;
+                    
+                    if (activeMods.multiplierMadness) {
+                        customMultiplier = 1;
+                    }
+                    
+                    if (activeMods.survival) {
+                        survivalLives--;
+                        statusText.innerText = `LIVES: ${survivalLives}`;
+                        if (survivalLives <= 0) {
+                            gameState = 'GAMEOVER';
+                            if (source) source.stop();
+                            sessionStats.sessionEndTime = Date.now();
+                            saveGameStats();
+                            setTimeout(() => showMenu(), 1000);
+                        }
+                    }
+                    
+                    spawnJudgment("MISS", "#444");
+                }
+                if (b.y > canvas.height) blocks.splice(i, 1);
+            });
+
+            particles.forEach((p, i) => {
+                p.x += p.vx; p.y += p.vy;
+                p.vy += p.gravity;
+                p.life -= 0.03;
+                if (p.life <= 0) particles.splice(i, 1);
+            });
+
+            judgments.forEach((j, i) => {
+                j.y -= 1;
+                j.alpha -= 0.03;
+                if (j.alpha <= 0) judgments.splice(i, 1);
+            });
+
+            hitGlow *= 0.9;
+            shakeIntensity *= 0.85;
+            
+            // Check if song ended
+            if (elapsed >= duration) {
+                gameState = 'GAMEOVER';
+                if (source) source.stop();
+                sessionStats.sessionEndTime = Date.now();
+                saveGameStats();
+                setTimeout(() => showMenu(), 1000);
+            }
+        }
+
+        function draw() {
+            ctx.save();
+            if (shakeIntensity > 0.1) ctx.translate((Math.random()-0.5)*shakeIntensity, (Math.random()-0.5)*shakeIntensity);
+            
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Waveform visualization
+            if (dataArray) {
+                ctx.beginPath();
+                ctx.strokeStyle = feverMode ? 'rgba(0, 242, 255, 0.12)' : 'rgba(255, 95, 0, 0.08)';
+                ctx.lineWidth = 2;
+                for(let i=0; i<dataArray.length; i++) {
+                    let h = (dataArray[i] / 255) * 150;
+                    ctx.moveTo(i * 4, canvas.height);
+                    ctx.lineTo(i * 4, canvas.height - h);
+                }
+                ctx.stroke();
+            }
+
+            // Active lane highlight with Tunnel Vision
+            const finalLanes = isMirrored ? [...currentLanePositions].reverse() : currentLanePositions;
+            const activeLaneX = finalLanes[playerLane];
+            
+            if (activeMods.tunnelVision) {
+                // Darken everything except active lane
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.fillRect(0, 0, activeLaneX - 45, canvas.height);
+                ctx.fillRect(activeLaneX + 45, 0, canvas.width - (activeLaneX + 45), canvas.height);
+            }
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+            gradient.addColorStop(0.8, feverMode ? 'rgba(0, 242, 255, 0.05)' : 'rgba(255, 95, 0, 0.03)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(activeLaneX - 45, 0, 90, canvas.height);
+
+            // Grid lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            for(let x=0; x<canvas.width; x+=25) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+
+            // Draw blocks with various mod effects
+            blocks.forEach(b => {
+                let blockX = currentLanePositions[b.lane];
+                
+                // Drunk Mode - sway
+                if (activeMods.drunkMode) {
+                    blockX += Math.sin(b.swayOffset) * 15;
+                }
+                
+                // Calculate opacity for fade/invisible mods
+                let opacity = 1;
+                if (activeMods.blockFadeOut) {
+                    let distanceToPlayer = Math.abs(b.y - PLAYER_Y);
+                    if (distanceToPlayer < 150) {
+                        opacity = distanceToPlayer / 150;
+                    }
+                }
+                if (activeMods.invisibleBlocks && b.y > canvas.height / 3) {
+                    opacity = 0;
+                }
+                if (activeMods.ghostMode && Math.sin(Date.now() / 100) > 0) {
+                    opacity *= 0.3;
+                }
+                if (activeMods.rhythmMemory && b.y > canvas.height / 2) {
+                    opacity = 0;
+                }
+                
+                // Chromatic Aberration effect
+                if (activeMods.chromaticAberration && streak > 10) {
+                    let offset = streak / 5;
+                    ctx.fillStyle = `rgba(255, 0, 0, ${opacity * 0.5})`;
+                    ctx.beginPath(); 
+                    ctx.roundRect(blockX - 25 - offset, b.y, 50, 10, 4); 
+                    ctx.fill();
+                    ctx.fillStyle = `rgba(0, 0, 255, ${opacity * 0.5})`;
+                    ctx.beginPath(); 
+                    ctx.roundRect(blockX - 25 + offset, b.y, 50, 10, 4); 
+                    ctx.fill();
+                }
+                
+                // Main block color
+                let blockColor = '#fff';
+                if (activeMods.rainbowFever) {
+                    let hue = (hueOffset + (b.y * 2)) % 360;
+                    blockColor = `hsl(${hue}, 100%, 50%)`;
+                }
+                
+                ctx.globalAlpha = opacity;
+                ctx.fillStyle = b.missed ? '#222' : blockColor;
+                ctx.beginPath(); 
+                ctx.roundRect(blockX - 25, b.y, 50, 10, 4); 
+                ctx.fill();
+                
+                if (!b.missed && opacity > 0) {
+                    ctx.shadowBlur = 10; 
+                    ctx.shadowColor = blockColor;
+                    ctx.strokeStyle = blockColor;
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+                
+                // Draw quantum split
+                if (b.isQuantum && !b.quantumCollapsed) {
+                    let blockX2 = currentLanePositions[b.quantumLane2];
+                    if (activeMods.drunkMode) {
+                        blockX2 += Math.sin(b.swayOffset + Math.PI) * 15;
+                    }
+                    ctx.fillStyle = b.missed ? '#222' : blockColor;
+                    ctx.globalAlpha = opacity * 0.5;
+                    ctx.beginPath(); 
+                    ctx.roundRect(blockX2 - 25, b.y, 50, 10, 4); 
+                    ctx.fill();
+                }
+                
+                ctx.globalAlpha = 1.0;
+            });
+
+            // Particles
+            particles.forEach(p => {
+                ctx.fillStyle = p.color || `rgba(255, 95, 0, ${p.life})`;
+                ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+            });
+
+            // Judgments
+            judgments.forEach(j => {
+                ctx.globalAlpha = j.alpha;
+                ctx.fillStyle = j.color;
+                ctx.font = 'bold 14px "Courier New"';
+                ctx.textAlign = 'center';
+                ctx.fillText(j.text, finalLanes[playerLane], j.y);
+            });
+            ctx.globalAlpha = 1.0;
+
+            // Player bar
+            const pX = finalLanes[playerLane];
+            const activeColor = feverMode ? '#00f2ff' : '#ff5f00';
+            
+            ctx.save();
+            ctx.globalAlpha = 1.0; 
+            ctx.shadowBlur = 0;    
+            
+            if (hitGlow > 0.5) { 
+                ctx.shadowBlur = hitGlow; 
+                ctx.shadowColor = activeColor; 
+            }
+            
+            let playerColor = activeColor;
+            if (activeMods.rainbowFever) {
+                playerColor = `hsl(${hueOffset}, 100%, 50%)`;
+            }
+            
+            ctx.fillStyle = playerColor;
+            ctx.beginPath(); 
+            ctx.roundRect(pX-40, PLAYER_Y, 80, 18, 9); 
+            ctx.fill();
+
+            if (feverMode) {
+                ctx.fillStyle = "#000";
+                ctx.font = "bold 10px Inter";
+                ctx.textAlign = "center";
+                ctx.fillText("X2", pX, PLAYER_Y + 13);
+            }
+
+            if (activeMods.multiplierMadness && customMultiplier > 1) {
+                ctx.fillStyle = "#000";
+                ctx.font = "bold 10px Inter";
+                ctx.textAlign = "center";
+                ctx.fillText(`X${customMultiplier.toFixed(1)}`, pX, PLAYER_Y + 13);
+            }
+
+            ctx.restore(); 
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            if (gameState === 'GAME') {
+                update();
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        showMenu();
+        
+        // Initial draw to clear black screen
+        ctx.fillStyle = '#050505';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    </script>
+</body>
+</html>
